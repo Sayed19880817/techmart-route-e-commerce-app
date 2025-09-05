@@ -98,7 +98,7 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
           </p>
           {/* Title */}
           <h3 className="font-semibold text-sm  line-clamp-1 hover:text-primary transition-colors">
-            <Link href={``}>{product.title}</Link>
+            <Link href={`/products/${product.id}`}>{product.title}</Link>
           </h3>
         </div>
       </div>
