@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,13 +8,14 @@ import { useParams } from "next/navigation";
 import { Product } from "@/interfaces";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { ShoppingCart, Heart, Truck, Shield, RotateCcw, Loader, Loader2 } from "lucide-react";
+import { Heart, Truck, Shield, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { renderStars } from "@/helpers/rating";
 import { SingleProductResponse } from "@/types";
 import { formatPrice } from "@/helpers/currency";
 import { apiServices } from "@/services/api";
 import toast from "react-hot-toast";
+import AddToCartButton from "@/components/products/AddToCartButton";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -137,11 +140,7 @@ export default function ProductDetailPage() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button size="lg" className="flex-1" disabled={product.quantity === 0 || addToCartLoading} onClick={handleAddToCart}>
-              {addToCartLoading && <Loader2 className="animate-spin" />}
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              Add to Cart
-            </Button>
+            <AddToCartButton addToCartLoading={addToCartLoading} handleAddToCart={handleAddToCart} productQuantity={product.quantity} />
             <Button variant="outline" size="lg">
               <Heart className="h-5 w-5" />
             </Button>

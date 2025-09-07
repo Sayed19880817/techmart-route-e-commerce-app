@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Star, ShoppingCart, Heart } from "lucide-react";
 import { renderStars } from "@/helpers/rating";
 import { formatPrice } from "@/helpers/currency";
+import AddToCartButton from "./AddToCartButton";
+import { useState } from "react";
+import { apiServices } from "@/services/api";
+import toast from "react-hot-toast";
 
 interface ProductCardProps {
   product: Product;
@@ -14,6 +18,14 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
+  const [addToCartLoading, setAddToCartLoading] = useState<boolean>(false);
+
+  async function handleAddToCart() {
+    setAddToCartLoading(true);
+    const data = await apiServices.addProductToCart(product!._id);
+    toast.success(data.message);
+    setAddToCartLoading(false);
+  }
   if (viewMode === "list") {
     return (
       <div className="flex gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
@@ -63,10 +75,9 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
               </div>
             </div>
 
-            <Button>
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Add to Cart
-            </Button>
+            <div>
+              <AddToCartButton addToCartLoading={addToCartLoading} handleAddToCart={handleAddToCart} productQuantity={product.quantity} />
+            </div>
           </div>
         </div>
       </div>
@@ -103,36 +114,26 @@ export function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
         </div>
       </div>
       <div className="px-4 py-1">
-           {/* Rating */}
+        {/* Rating */}
         <div className="flex items-center gap-1 mb-2">
           <div className="flex">{renderStars(product.ratingsAverage)}</div>
-          <span className="text-xs text-muted-foreground">
-            ({product.ratingsQuantity})
-          </span>
+          <span className="text-xs text-muted-foreground">({product.ratingsQuantity})</span>
         </div>
 
         {/* Category */}
         <p className="text-xs text-muted-foreground mb-2">
-          <Link
-            href={``}
-            className="hover:text-primary hover:underline transition-colors"
-          >
+          <Link href={``} className="hover:text-primary hover:underline transition-colors">
             {product.category.name}
           </Link>
         </p>
 
         {/* Price */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-lg font-bold text-primary">
-            {formatPrice(product.price)}
-          </span>
+          <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
           <span className="text-xs text-muted-foreground">{product.sold} sold</span>
         </div>
         {/* Add to Cart Button */}
-        <Button className="w-full" size="sm">
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Add to Cart
-        </Button>
+        <AddToCartButton addToCartLoading={addToCartLoading} handleAddToCart={handleAddToCart} productQuantity={product.quantity} />
       </div>
     </div>
   );
