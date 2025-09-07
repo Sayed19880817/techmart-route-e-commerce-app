@@ -6,12 +6,13 @@ import { useParams } from "next/navigation";
 import { Product } from "@/interfaces";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { ShoppingCart, Heart, Truck, Shield, RotateCcw } from "lucide-react";
+import { ShoppingCart, Heart, Truck, Shield, RotateCcw, Loader, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { renderStars } from "@/helpers/rating";
 import { SingleProductResponse } from "@/types";
 import { formatPrice } from "@/helpers/currency";
 import { apiServices } from "@/services/api";
+import toast from "react-hot-toast";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(-1);
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
 
   async function fetchProductDetails() {
     setLoading(true);
@@ -32,6 +34,13 @@ export default function ProductDetailPage() {
   useEffect(() => {
     fetchProductDetails();
   }, []);
+
+  async function handleAddToCart() {
+    setAddToCartLoading(true);
+    const data = await apiServices.addProductToCart(product!._id);
+    toast.success(data.message);
+    setAddToCartLoading(false);
+  }
 
   if (loading) {
     return (
@@ -54,7 +63,6 @@ export default function ProductDetailPage() {
     );
   }
 
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -69,22 +77,8 @@ export default function ProductDetailPage() {
           {product.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
               {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 ${
-                    selectedImage === index
-                      ? "border-primary"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`${product.title} ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
+                <button key={index} onClick={() => setSelectedImage(index)} className={`relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 ${selectedImage === index ? "border-primary" : "border-gray-200"}`}>
+                  <Image src={image} alt={`${product.title} ${index + 1}`} fill className="object-cover" sizes="80px" />
                 </button>
               ))}
             </div>
@@ -129,10 +123,7 @@ export default function ProductDetailPage() {
               {product.category.name}
             </Link>
             {product.subcategory.map((sub) => (
-              <span
-                key={sub._id}
-                className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm"
-              >
+              <span key={sub._id} className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm">
                 {sub.name}
               </span>
             ))}
@@ -146,11 +137,8 @@ export default function ProductDetailPage() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button
-              size="lg"
-              className="flex-1"
-              disabled={product.quantity === 0}
-            >
+            <Button size="lg" className="flex-1" disabled={product.quantity === 0 || addToCartLoading} onClick={handleAddToCart}>
+              {addToCartLoading && <Loader2 className="animate-spin" />}
               <ShoppingCart className="h-5 w-5 mr-2" />
               Add to Cart
             </Button>
